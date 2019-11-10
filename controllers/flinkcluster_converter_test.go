@@ -512,6 +512,7 @@ func TestGetDesiredClusterState(t *testing.T) {
 					Labels: map[string]string{"app": "flink", "cluster": "flinkjobcluster-sample"},
 				},
 				Spec: v1.PodSpec{
+					InitContainers: []v1.Container{},
 					Containers: []v1.Container{
 						{
 							Name:  "main",

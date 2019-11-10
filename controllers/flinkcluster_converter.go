@@ -534,6 +534,8 @@ func getDesiredJob(
 	var envVars = []corev1.EnvVar{}
 	envVars = append(envVars, flinkCluster.Spec.EnvVars...)
 
+	var initContainers = []corev1.Container{}
+
 	// If the JAR file is remote, put the URI in the env variable
 	// FLINK_JOB_JAR_URI and rewrite the JAR path to a local path. The entrypoint
 	// script of the container will download it before submitting it to Flink.
@@ -545,6 +547,14 @@ func getDesiredJob(
 			Name:  "FLINK_JOB_JAR_URI",
 			Value: jobSpec.JarFile,
 		})
+		var initContainer = corev1.Container{
+			Name:            "init",
+			Image:           "functicons/flink:1.8.2-scala_2.11-gcs",
+			ImagePullPolicy: corev1.PullIfNotPresent,
+			Command: []string{
+				"gsutil", "cp", jobSpec.JarFile, "/opt/flink/job/"},
+		}
+		initContainers = append(initContainers, initContainer)
 	}
 	jobArgs = append(jobArgs, jarPath)
 
@@ -563,6 +573,7 @@ func getDesiredJob(
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
+					InitContainers: initContainers,
 					Containers: []corev1.Container{
 						corev1.Container{
 							Name:            "main",
