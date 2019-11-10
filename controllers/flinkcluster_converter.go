@@ -547,8 +547,8 @@ func getDesiredJob(
 		})
 	}
 	jobArgs = append(jobArgs, jarPath)
-
 	jobArgs = append(jobArgs, jobSpec.Args...)
+
 	var job = &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: clusterNamespace,
@@ -563,6 +563,7 @@ func getDesiredJob(
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
+					InitContainers: jobSpec.InitContainers,
 					Containers: []corev1.Container{
 						corev1.Container{
 							Name:            "main",
